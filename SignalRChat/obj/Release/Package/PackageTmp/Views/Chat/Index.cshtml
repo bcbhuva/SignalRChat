@@ -1,0 +1,135 @@
+﻿@using Newtonsoft.Json
+@model dynamic
+
+@{
+  Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Chat Widget</title>
+
+
+  <link rel="stylesheet" href="~/Content/chat/reset.css">
+  <link rel='stylesheet prefetch' href='https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css'>
+  <link href="~/Content/bootstrap.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="~/Content/chat/style.css">
+  <link href="~/Content/toastr.css" rel="stylesheet" />
+</head>
+<body ng-app="Chat" onbeforeunload="return 'This Chat not handle yet refresh page event, please do not refresh this page';">
+  <div class="chat-container clearfix" ng-controller="ChatController">
+    <div class="people-list" id="people-list">
+      <div style="padding: 20px;margin-bottom: 2px;border-bottom: solid 1px black;height: 80px;">
+        <div class="chat-avatar"></div>
+        <div class="about">
+          <div class="name">{{MyName}}</div>
+          <div class="status">
+            <i class="fa fa-circle online"></i> online
+          </div>
+        </div>
+      </div>
+      <div class="search">
+        <input type="text" ng-model="Search" placeholder="search" />
+        <i class="fa fa-search"></i>
+      </div>
+      <ul class="list" style="overflow: auto;">
+        <li class="clearfix pointer" onclick="ChatApp.ActivateChat({{user}})" ng-animate="'animate'" ng-repeat="user in Users | filter:Search">
+          <div class="chat-avatar"></div>
+          <div class="about">
+            <div class="name">
+              {{user.Name}}
+              <div class="unread-message display-{{getUnreadCount(user.Id)>0}}">{{getUnreadCount(user.Id)}}</div>
+            </div>
+            
+            <div class="status">
+              <i class="fa fa-circle online"></i> online
+            </div>
+          </div>
+          <i class="glyphicon glyphicon-ok display-{{CurrentUserId==user.Id}}" style="float: right;"></i>
+        </li>
+      </ul>
+    </div>
+    <div class="chat display-{{CurrentUser===null}}" style="background-color: #F2F5F8; height: 600px;">
+      <div class="alert alert-warning alert-dismissible" role="alert" style="margin: 200px 20px;top: 30px;text-align: center;">
+        
+        <strong>Warning!</strong> Chat is empty.
+      </div>
+    </div>
+    <div class="chat display-{{CurrentUser!==null}}">
+      <div class="chat-header clearfix">
+        <div class="chat-avatar"></div>
+        <div class="chat-about">
+          <div class="chat-with"><span style="font-size: 11px !important;color: #9A9494;">Chat with</span> {{CurrentUserName}}</div>
+          <div class="chat-num-messages">{{getTotalMessage()}}</div>
+        </div>
+        <i class="fa fa-star"></i>
+      </div> <!-- end chat-header -->
+
+      <div class="chat-history">
+        <ul>
+          <li class="{{item.source=='other'? 'clearfix':''}}" ng-repeat="item in ActiveMessages">
+            <div class="message-data {{item.source=='other'? 'align-right':''}}">
+              <span ng-if="item.source=='my'"><span class="message-data-name"><i class="fa fa-circle online"></i> {{item.from}}</span></span>
+              <span class="message-data-time">{{displayTime(item.time)}}</span>
+              <span ng-if="item.source=='other'"><span class="message-data-name">{{item.from}}</span> <i class="fa fa-circle me"></i></span>
+            </div>
+            <div class="message {{item.source}}-message">
+              {{item.message}}
+            </div>
+          </li>
+
+        </ul>
+
+      </div> <!-- end chat-history -->
+
+      <div class="chat-message clearfix">
+        <textarea name="message-to-send" onkeydown="return ChatApp.OnKeyPress(event)" ng-model="Message" id="message-to-send" placeholder="Type your message" rows="3"></textarea>
+
+        <i class="fa fa-file-o"></i> &nbsp;&nbsp;&nbsp;
+        <i class="fa fa-file-image-o"></i>
+
+        <button ng-click="SendMessage()">Send</button>
+      </div> <!-- end chat-message -->
+
+    </div> <!-- end chat -->
+
+  </div> <!-- end container -->
+ 
+
+
+<div class="modal fade" tabindex="-1" role="dialog" id="modal-new-user">
+    <div class="modal-dialog" style="width: 400px;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" style="color: black;"><i class="glyphicon glyphicon-user"></i> New User</h4>
+        </div>
+        <div class="modal-body">
+          <input type="text" class="form-control" id="new-user-name" placeholder="Enter your name">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" onclick="ChatApp.AddUser()" >Save</button>
+        </div>
+      </div>
+    </div>
+</div>
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+  <script src="~/Scripts/jquery.signalR-2.2.0.js"></script>
+  <script src="~/Scripts/angular.v1.1.5.js"></script>
+  <script src="~/Scripts/bootstrap.js"></script>>
+  <script src="~/Scripts/moment.js"></script>
+  <script src="~/Scripts/toastr.js"></script>
+  <script src="~/Scripts/Chat/chat.js"></script>
+  <script src="~/Scripts/Chat/ChatController.js"></script>
+  <script src="@Url.Content("~/signalr/hubs")"></script>
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    ChatApp.Scope.$apply(function() {
+      ChatApp.Scope.Users=@Html.Raw(JsonConvert.SerializeObject(MvcApplication.Users));
+    });
+  });
+</script>
+</body>
+</html>
