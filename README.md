@@ -1,3 +1,3 @@
 # SignalRChat
-Simple Chat App using ASP.Net MVC, SingalR, AngularJS
+Simple Chat App using ASP.Net MVC, SingalR and AngularJS
 
